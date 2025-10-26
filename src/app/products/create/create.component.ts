@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-create',
   imports: [FormsModule],
+  standalone: true,
   templateUrl: './create.component.html',
   styleUrl: './create.component.css',
 })

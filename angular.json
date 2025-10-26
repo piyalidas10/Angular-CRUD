@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "myAngularProject": {
+    "angular-crud": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,11 +13,12 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "namedChunks": true,
             "outputPath": "dist/angular-crud",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": ["zone.js"],
+            "polyfills": [
+              "zone.js"
+            ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
@@ -25,8 +26,9 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.css"],
-            "scripts": [],
+            "styles": [
+              "src/styles.css"
+            ],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {
@@ -35,18 +37,6 @@
           },
           "configurations": {
             "production": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
-                }
-              ],
               "outputHashing": "all"
             },
             "development": {
@@ -61,36 +51,26 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "myAngularProject:build:production"
+              "buildTarget": "angular-crud:build:production"
             },
             "development": {
-              "buildTarget": "myAngularProject:build:development"
+              "buildTarget": "angular-crud:build:development"
             }
           },
           "defaultConfiguration": "development"
         },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n"
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+        "prerender": {
+          "builder": "@angular-devkit/build-angular:prerender",
           "options": {
-            "polyfills": ["zone.js", "zone.js/testing"],
-            "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
-            ],
-            "styles": ["src/styles.css"],
-            "scripts": []
+            "browserTarget": "angular-crud:build:production",
+            "serverTarget": "angular-crud:build:production",
+            "routesFile": "src/app/app.routes.server.ts"
           }
         }
       }
     }
   },
   "cli": {
-    "analytics": "34d91b29-e0ec-4ece-b98e-6323a7f96fbd"
+    "analytics": false
   }
 }

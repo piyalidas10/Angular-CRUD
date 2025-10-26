@@ -4,31 +4,29 @@ import {
   isMainModule,
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
-import express from 'express';
+
+import express, { Request, Response, NextFunction } from 'express'; // ✅ default import
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import cors from 'cors';
 
+// -----------------------------------------------------------------------------
+// Paths
+// -----------------------------------------------------------------------------
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
 
+// -----------------------------------------------------------------------------
+// Express + Angular SSR setup
+// -----------------------------------------------------------------------------
 const app = express();
+app.use(cors()); // ✅ enable all origins for testing
+app.use(express.json());
 const angularApp = new AngularNodeAppEngine();
 
-/**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/**', (req, res) => {
- *   // Handle API request
- * });
- * ```
- */
-
-/**
- * Serve static files from /browser
- */
+// -----------------------------------------------------------------------------
+// Serve static assets
+// -----------------------------------------------------------------------------
 app.use(
   express.static(browserDistFolder, {
     maxAge: '1y',
@@ -37,30 +35,33 @@ app.use(
   }),
 );
 
-/**
- * Handle all other requests by rendering the Angular application.
- */
-app.use('/**', (req, res, next) => {
-  angularApp
-    .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
-    .catch(next);
+// -----------------------------------------------------------------------------
+// Handle all other routes through Angular SSR
+// -----------------------------------------------------------------------------
+app.use('**', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const response = await angularApp.handle(req);
+    if (response) {
+      writeResponseToNodeResponse(response, res);
+    } else {
+      next();
+    }
+  } catch (err) {
+    next(err);
+  }
 });
 
-/**
- * Start the server if this module is the main entry point.
- * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
- */
+// -----------------------------------------------------------------------------
+// Start standalone server
+// -----------------------------------------------------------------------------
 if (isMainModule(import.meta.url)) {
   const port = process.env['PORT'] || 4000;
-  app.listen(port, () => {
-    console.log(`Node Express server listening on http://localhost:${port}`);
-  });
+  app.listen(port, () =>
+    console.log(`✅ Angular SSR server running at http://localhost:${port}`),
+  );
 }
 
-/**
- * The request handler used by the Angular CLI (dev-server and during build).
- */
+// -----------------------------------------------------------------------------
+// Export request handler for Angular CLI SSR
+// -----------------------------------------------------------------------------
 export const reqHandler = createNodeRequestHandler(app);
